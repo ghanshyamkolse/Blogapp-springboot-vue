@@ -1,0 +1,11 @@
+.card {
+  width: 600px;
+  padding: 10px;
+  margin: 10px;
+  border: 20px, solid;
+
+  border-radius: 30;
+}
+nav {
+  width: 100%;
+}

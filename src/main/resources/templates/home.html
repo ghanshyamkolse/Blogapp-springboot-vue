@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <nav>
+        <nav-bar></nav-bar>
+      </nav>
+      <div class="container">
+        <div>
+          <section>
+            <b-field label="Name of the post">
+              <b-input value="Enter Title here" v-model="posttitle"></b-input>
+            </b-field>
+
+            <b-field
+              label="Email"
+              :label-position="labelPosition"
+              type="is-danger"
+              message="This email is invalid"
+            >
+              <b-input type="email" maxlength="30" v-model="Userid"> </b-input>
+            </b-field>
+
+            <b-field label="Description" :label-position="labelPosition">
+              <b-input maxlength="200" type="textarea" v-model="postbody"></b-input>
+            </b-field>
+            <b-field>
+              <b-button @click="clickMe">Click Me</b-button>
+            </b-field>
+          </section>
+        </div>
+        <div>
+          <ul>
+            <li style="list-style-type: none" v-for="post in Posts" class="notification is-primary">
+              <post-card v-bind:post="post" v-bind:key="post.id"> </post-card>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- Buefy components goes here -->
+    </div>
+
+    <script src="https://unpkg.com/vue"></script>
+    <!-- Full bundle -->
+    <script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
+
+    <!-- Individual components -->
+    <script src="https://unpkg.com/buefy/dist/components/table"></script>
+    <script src="https://unpkg.com/buefy/dist/components/input"></script>
+
+    <script>
+      Vue.component('post-card', {
+        props: ['post'],
+        template: `
+                  <div class="card">
+                    <div class="card-content">
+                      <p class="title">
+                         <strong> {{ post.title }}</strong>
+
+                          </p>
+                      <p class="subtitle">
+                        {{ post.body }}
+                      </p>
+                    </div>
+                    <footer class="card-footer">
+                      <p class="card-footer-item">
+                        <span>
+                          View on <a href="https://twitter.com/codinghorror/status/506010907021828096">Twitter</a>
+                        </span>
+                      </p>
+                      <p class="card-footer-item">
+                        <span>
+                          Share on <a href="#">Facebook</a>
+                        </span>
+                      </p>
+                    </footer>
+                  </div>
+               `,
+      });
+
+      Vue.component('nav-bar', {
+        props: ['props'],
+        template: `
+                        <b-navbar class="has-background-grey">
+
+                            <template slot="start">
+                                <b-navbar-item href="#">
+                                    Home
+                                </b-navbar-item>
+                                <b-navbar-item href="#">
+                                    Documentation
+                                </b-navbar-item>
+                                <b-navbar-dropdown label="Info">
+                                    <b-navbar-item href="#">
+                                        About
+                                    </b-navbar-item>
+                                    <b-navbar-item href="#">
+                                        Contact
+                                    </b-navbar-item>
+                                </b-navbar-dropdown>
+                            </template>
+
+                            <template slot="end">
+                                <b-navbar-item tag="div">
+                                    <div class="buttons">
+                                        <a class="button is-primary">
+                                            <strong>Sign up</strong>
+                                        </a>
+                                        <a class="button is-light">
+                                            Log in
+                                        </a>
+                                    </div>
+                                </b-navbar-item>
+                            </template>
+                        </b-navbar>
+                  `,
+      });
+
+      new Vue({
+        el: '#app',
+        data: {
+          Posts: null,
+          postbody: 'add description here',
+          posttitle: 'post title',
+          Userid: 'someone@gmail.com',
+          labelPosition: 'left',
+        },
+        async created() {
+          // fetch the data when the view is created and the data is
+          // already being observed
+          this.fetchData();
+        },
+        methods: {
+          fetchData: function () {
+            // GET request using fetch with set headers
+            const headers = { 'Content-Type': 'application/json' };
+            fetch('http://localhost:8080/Post', { headers }).then(async (response) => {
+              this.Posts = await response.json();
+            });
+          },
+          addPost: function () {
+            const requestOptions = {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer my-token',
+                'My-Custom-Header': 'foobar',
+              },
+              body: JSON.stringify({
+                Userid: this.Userid,
+                title: this.posttitle,
+                body: this.postbody,
+              }),
+            }; // POST request using fetch with set headers
+
+            fetch('http://localhost:8080/Post', requestOptions)
+              .then((response) => response.json())
+              .then((data) => (this.postId = data.id));
+          },
+          clickMe: async function () {
+            await this.addPost();
+            this.fetchData();
+            this.$buefy.notification.open({
+              message: 'post added successfully!',
+              type: 'is-success',
+            });
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

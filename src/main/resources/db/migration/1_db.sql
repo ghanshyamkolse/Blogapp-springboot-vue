@@ -1,0 +1,1 @@
+SELECT ${*} FROM `table` ${as nameAlias} ${WHERE condition}

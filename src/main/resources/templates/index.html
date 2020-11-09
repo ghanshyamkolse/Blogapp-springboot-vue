@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Include Bootstrap -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
+    <!-- Optional theme -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+      integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>BlogApp</title>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <header>
+        <h1 class="display-3 red">BLOG-APP</h1>
+        <p class="lead">Look at our new blog post</p>
+        <!-- accessing request parameter in thymeleaf -->
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <a class="navbar-brand" href="#">Navbar</a>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <form class="form-inline my-2 my-lg-0">
+              <input
+                class="form-control mr-sm-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+              />
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+          </div>
+        </nav>
+        <div id="contents-main">
+          <div class="lead">
+            <strong>Name of Event:</strong>
+            <span th:text="${eventName}"></span>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div id="app">
+          <ul>
+            <li style="list-style-type: none" v-for="post in Posts">
+              <post-card v-bind:post="post" v-bind:key="post.id"> </post-card>
+            </li>
+          </ul>
+        </div>
+ 
+      </main>
+
+      <nav></nav>
+      <footer></footer>
+    </div>
+
+    <!-- include Vue.js -->
+    <!-- we include babel js so that we can write ES6 code in the browser
+     for a more production like setup it is recommended to setup a build process
+     to transpile and minify the code (such as using webpack)
+ -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+
+    <script type="text/babel">
+      // post-card is now a Vue component that generates a 'card' showing a player
+      // It can be used
+      // declaratively like <post-card v-bind:post="post">
+
+      Vue.component('post-card', {
+        props: ['post'],
+        template: ` <div class="card text-center bg-success">
+                          <div class="card-body ">
+                            <h5 class="card-title">
+                              <div class=" bg-danger text-primary ">{{ post.title }}</div> </h5>
+                              <hr>
+                            <p class="card-text">  {{ post.body }}</p>
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                          </div>
+                          <div class="card-footer text-muted">
+                            2 days ago
+                          </div>
+                        </div> `,
+      });
+      Vue.component('Addpostform', {
+        props: ['post'],
+        template: `
+                  <form>
+                    <div class="form-group">
+                      <label>AddPost</label>
+                      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleInputPassword1">Password</label>
+                      <input type="password" class="form-control" id="exampleInputPassword1">
+                    </div>
+                    <div class="form-group form-check">
+                      <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                      <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                    </div>
+                     <div class="form-group">
+                       <label for="exampleFormControlTextarea1">Example textarea</label>
+                       <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" :click="addPost">Submit</button>
+                  </form>
+
+        `,
+      });
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          Posts: null,
+        },
+        async created() {
+          // fetch the data when the view is created and the data is
+          // already being observed
+          this.fetchData();
+        },
+        methods: {
+          fetchData: function () {
+            // GET request using fetch with set headers
+            const headers = { 'Content-Type': 'application/json' };
+            fetch('http://localhost:8080/Post', { headers }).then(async (response) => {
+              this.Posts = await response.json();
+            });
+          },
+          addPost(post) {
+            const requestOptions = {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer my-token',
+                'My-Custom-Header': 'foobar',
+              },
+              body: JSON.stringify({ title: 'Vue POST Request Example' }),
+            }; // POST request using fetch with set headers
+
+            fetch('https://jsonplaceholder.typicode.com/posts', requestOptions)
+              .then((response) => response.json())
+              .then((data) => (this.postId = data.id));
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
